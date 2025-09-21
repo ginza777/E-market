@@ -1,0 +1,302 @@
+{% extends 'frontend/base.html' %}
+{% load static %}
+
+{% block title %}Home - E-Shop{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 100px 0;
+        margin-bottom: 50px;
+    }
+    .product-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        height: 100%;
+        border: none;
+    }
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .product-image {
+        height: 200px;
+        object-fit: cover;
+        background: #f8f9fa;
+    }
+    .price {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #28a745;
+    }
+    .stock-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+    .category-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+        height: 100%;
+    }
+    .category-card:hover {
+        transform: translateY(-5px);
+    }
+    .category-icon {
+        font-size: 3rem;
+        color: #667eea;
+        margin-bottom: 20px;
+    }
+    .search-box {
+        border-radius: 25px;
+        border: 2px solid #e9ecef;
+        padding: 15px 25px;
+        font-size: 1.1rem;
+    }
+    .search-box:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Welcome to E-Shop</h1>
+                <p class="lead mb-4">Discover amazing products at unbeatable prices. Shop with confidence and enjoy fast delivery.</p>
+                <div class="d-flex gap-3">
+                    <a href="{% url 'frontend:products' %}" class="btn btn-light btn-lg">
+                        <i class="fas fa-shopping-bag me-2"></i>Shop Now
+                    </a>
+                    <a href="{% url 'frontend:categories' %}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-list me-2"></i>Browse Categories
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <img src="{% static 'images/hero-image.png' %}" alt="E-Shop Hero" class="img-fluid" style="max-height: 400px;">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Search Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold mb-3">
+                        <i class="fas fa-search me-2"></i>Find What You're Looking For
+                    </h2>
+                    <p class="text-muted">Search through our extensive collection of products</p>
+                </div>
+                <form method="GET" action="{% url 'frontend:products' %}">
+                    <div class="input-group">
+                        <input type="text" class="form-control search-box" name="q" 
+                               placeholder="Search products, categories, or descriptions..." 
+                               value="{{ request.GET.q }}">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search me-2"></i>Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+{% if categories %}
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold mb-3">
+                <i class="fas fa-th-large me-2"></i>Shop by Category
+            </h2>
+            <p class="text-muted">Browse our product categories</p>
+        </div>
+        <div class="row g-4">
+            {% for category in categories %}
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-{% if 'electronics' in category.title.lower %}laptop{% elif 'books' in category.title.lower %}book{% elif 'clothing' in category.title.lower %}tshirt{% else %}box{% endif %}"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">{{ category.title }}</h5>
+                        <p class="text-muted mb-4">{{ category.description|truncatewords:15 }}</p>
+                        <a href="{% url 'frontend:products' %}?category={{ category.id }}" class="btn btn-primary">
+                            <i class="fas fa-eye me-2"></i>View Products
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{% url 'frontend:categories' %}" class="btn btn-outline-primary">
+                <i class="fas fa-th-large me-2"></i>View All Categories
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Featured Products Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <h2 class="fw-bold">
+                <i class="fas fa-star text-warning me-2"></i>Featured Products
+            </h2>
+            <a href="{% url 'frontend:products' %}" class="btn btn-outline-primary">
+                View All Products <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+        
+        {% if featured_products %}
+            <div class="row g-4">
+                {% for product in featured_products %}
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <div class="card product-card h-100 border-0 shadow-sm">
+                            <div class="position-relative">
+                                {% if product.image %}
+                                    <img src="{{ product.image.url }}" class="card-img-top product-image" alt="{{ product.title }}">
+                                {% else %}
+                                    <img src="{% static 'images/no-image.png' %}" class="card-img-top product-image" alt="No image">
+                                {% endif %}
+                                
+                                <!-- Stock Badge -->
+                                <div class="stock-badge">
+                                    {% if product.stock_quantity > 10 %}
+                                        <span class="badge bg-success">In Stock</span>
+                                    {% elif product.stock_quantity > 0 %}
+                                        <span class="badge bg-warning">Low Stock</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Out of Stock</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title fw-bold mb-2">{{ product.title }}</h5>
+                                <p class="card-text text-muted small mb-3 flex-grow-1">
+                                    {{ product.description|truncatewords:15 }}
+                                </p>
+                                
+                                <div class="mt-auto">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="price">${{ product.price }}</span>
+                                        <small class="text-muted">
+                                            <i class="fas fa-box me-1"></i>{{ product.stock_quantity }} left
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-primary" onclick="addToCart({{ product.id }})">
+                                            <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                                        </button>
+                                        <button class="btn btn-outline-secondary btn-sm" onclick="viewProduct({{ product.id }})">
+                                            <i class="fas fa-eye me-1"></i>View Details
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-box fa-4x text-muted"></i>
+                </div>
+                <h3 class="text-muted mb-3">No Products Available</h3>
+                <p class="text-muted mb-4">Products will appear here once they are added to the system.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-shipping-fast fa-2x"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Fast Delivery</h5>
+                    <p class="text-muted">Quick and reliable delivery to your doorstep</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-shield-alt fa-2x"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Secure Payment</h5>
+                    <p class="text-muted">Safe and secure payment processing</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-headset fa-2x"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">24/7 Support</h5>
+                    <p class="text-muted">Round-the-clock customer support</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function addToCart(productId) {
+    // Add to cart functionality
+    alert('Product ' + productId + ' added to cart!');
+}
+
+function viewProduct(productId) {
+    // View product details
+    alert('Viewing product ' + productId);
+}
+
+// Add smooth scrolling for better UX
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click animation to product cards
+    const productCards = document.querySelectorAll('.product-card');
+    productCards.forEach(card => {
+        card.addEventListener('click', function() {
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    });
+    
+    // Add hover effect to category cards
+    const categoryCards = document.querySelectorAll('.category-card');
+    categoryCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.background = 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.background = 'white';
+        });
+    });
+});
+</script>
+{% endblock %}

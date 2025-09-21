@@ -1,0 +1,240 @@
+{% extends 'frontend/base.html' %}
+{% load static %}
+
+{% block title %}Categories - E-Shop{% endblock %}
+
+{% block extra_css %}
+<style>
+    .category-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        height: 100%;
+        border: none;
+        overflow: hidden;
+    }
+    .category-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .category-image {
+        height: 200px;
+        object-fit: cover;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .category-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .category-card:hover .category-overlay {
+        opacity: 1;
+    }
+    .category-title {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+    .product-count {
+        background: rgba(255,255,255,0.9);
+        color: #333;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 80px 0;
+        margin-bottom: 50px;
+    }
+    .stats-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold mb-4">
+                    <i class="fas fa-th-large me-3"></i>Product Categories
+                </h1>
+                <p class="lead mb-4">Explore our wide range of product categories and find exactly what you're looking for.</p>
+                <div class="d-flex gap-3">
+                    <a href="{% url 'frontend:products' %}" class="btn btn-light btn-lg">
+                        <i class="fas fa-shopping-bag me-2"></i>View All Products
+                    </a>
+                    <a href="{% url 'frontend:home' %}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-home me-2"></i>Back to Home
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center">
+                <i class="fas fa-th-large fa-8x opacity-75"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Statistics Section -->
+    <div class="row mb-5">
+        <div class="col-md-4 mb-4">
+            <div class="stats-card">
+                <div class="stats-number">{{ categories.count }}</div>
+                <div class="text-muted">Active Categories</div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="stats-card">
+                <div class="stats-number">{{ total_products }}</div>
+                <div class="text-muted">Total Products</div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="stats-card">
+                <div class="stats-number">{{ active_products }}</div>
+                <div class="text-muted">Active Products</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories Grid -->
+    {% if categories %}
+        <div class="row g-4">
+            {% for category in categories %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="card category-card shadow-sm">
+                        <div class="position-relative">
+                            {% if category.image %}
+                                <img src="{{ category.image.url }}" class="card-img-top category-image" alt="{{ category.title }}">
+                            {% else %}
+                                <div class="category-image d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-image fa-3x text-white opacity-50"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Overlay with title -->
+                            <div class="category-overlay">
+                                <div class="text-center">
+                                    <h3 class="category-title">{{ category.title }}</h3>
+                                    <div class="product-count">
+                                        <i class="fas fa-box me-2"></i>{{ category.product_count }} Products
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold mb-3">{{ category.title }}</h5>
+                            <p class="card-text text-muted mb-4">
+                                {{ category.description|truncatewords:20 }}
+                            </p>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="text-muted small">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    Added {{ category.created_at|date:"M d, Y" }}
+                                </div>
+                                <div class="badge bg-success">
+                                    <i class="fas fa-check-circle me-1"></i>Active
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <a href="{% url 'frontend:products' %}?category={{ category.id }}" class="btn btn-primary w-100">
+                                    <i class="fas fa-eye me-2"></i>View Products
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- No Categories Found -->
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="fas fa-th-large fa-4x text-muted"></i>
+            </div>
+            <h3 class="text-muted mb-3">No Categories Available</h3>
+            <p class="text-muted mb-4">Categories will appear here once they are added to the system.</p>
+            <a href="{% url 'frontend:home' %}" class="btn btn-primary">
+                <i class="fas fa-home me-2"></i>Back to Home
+            </a>
+        </div>
+    {% endif %}
+
+    <!-- Call to Action Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="bg-light rounded-3 p-5 text-center">
+                <h3 class="fw-bold mb-3">Can't Find What You're Looking For?</h3>
+                <p class="text-muted mb-4">Browse all our products or use our advanced search to find exactly what you need.</p>
+                <div class="d-flex gap-3 justify-content-center">
+                    <a href="{% url 'frontend:products' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-shopping-bag me-2"></i>Browse All Products
+                    </a>
+                    <a href="{% url 'frontend:home' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-search me-2"></i>Advanced Search
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Add smooth scrolling for better UX
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click animation to category cards
+    const categoryCards = document.querySelectorAll('.category-card');
+    categoryCards.forEach(card => {
+        card.addEventListener('click', function() {
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    });
+    
+    // Add hover effect to stats cards
+    const statsCards = document.querySelectorAll('.stats-card');
+    statsCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.background = 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.background = 'white';
+        });
+    });
+});
+</script>
+{% endblock %}
