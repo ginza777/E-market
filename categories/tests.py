@@ -3,7 +3,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework import status
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 from unittest.mock import patch, Mock
 import pytest
@@ -77,7 +77,7 @@ class CategoryAPITest(APITestCase):
     
     def setUp(self):
         """Set up test data."""
-        self.client = Client()
+        self.client = APIClient()
         
         # Create test user
         self.user = User.objects.create_user(
@@ -85,8 +85,14 @@ class CategoryAPITest(APITestCase):
             username='testuser',
             first_name='Test',
             last_name='User',
-            password='testpass123'
+            password='testpass123',
+            is_staff=True,
+            is_superuser=True
         )
+        
+        # Generate JWT token
+        self.refresh = RefreshToken.for_user(self.user)
+        self.access_token = str(self.refresh.access_token)
         
         # Create test category
         self.category = Category.objects.create(
